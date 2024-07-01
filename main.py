@@ -1,26 +1,34 @@
 import gradio as gr
 from forex_python.converter import CurrencyRates
-from datetime import datetime
+import requests
+import tkinter as tk
 
-valid_currency=["USD", "EUR", "GBP", "ILS", "DKK", "CAD", "IDR", "BGN","JPY", "HUF", "RON", "MYR", "SEK", "SGD", "HKD", "AUD", "CHF", "KRW", "CNY", "TRY", "HRK", "NZD", "THB", "LTL", "NOK", "RUB","INR", "MXN", "CZK", "BRL", "PLN", "PHP", "ZAR"]
-c_Rate=CurrencyRates()
+def get_data():
+    api_key = open ('api_key.txt', 'r').read()
+    print(api_key)
+
+    url = f'https://api.fastforex.io/fetch-all?api_key={api_key}'
+    response = requests.get(url)
+    data = response.json()
+    rates=data['results']
+    keys = list(data['results'].keys())
+    return(keys, rates)
+
 def converter(currency1,currency2,box1,box2):
     if (currency1 is None and currency2 is None):
         return('Insert the currency','Insert the currency')
     elif (currency1 is None):
         return('Insert the currency',box2)
-    elif (currency1 is None):
+    elif (currency2 is None):
         return(box1,'Insert the currency')
-    
+
     if box1!='':
         box1=box1.replace(',','.')
         try:
-            c1=float(box1)
+            value=float(box1)
         except:
             return('Invalid input',box2)
-        now = datetime.now()
-        rate = c_Rate.exchange_rate(currency1,currency2, now)
-        result = float(rate) * float(rate)
+        result=convert(currency1, currency2, value)
         return(box1, result)
     else:
         box2=box2.replace(',','.')
@@ -28,25 +36,52 @@ def converter(currency1,currency2,box1,box2):
             c2=float(box2)
         except:
             return(box1,'Invalid input')
-        
-        now = datetime.now()
-        rate = c_Rate.exchange_rate(c1,c2, now)
-        result = float(rate) * float(rate)
+        result=convert(currency2, currency1, value)
         return(result, box2)
 
-with gr.Blocks() as demo:
-    gr.Markdown("# Currency converter")
+def convert(from_currency, to_currency, value):
+    if from_currency=='USD':
+        return round(value*rates[to_currency],2)
+    elif (to_currency=='USD'):
+        return round(value/rates[from_currency], 2)
+    else:
+        return round((value/rates['USD'])*rates[to_currency],2)
+        
+class CurrencyConverter:
 
-    with gr.Row():
-        with gr.Column():
-            gr.Markdown('## From: ')
-            currency1=gr.Dropdown(choices=valid_currency, label="Currency")
-            box1=gr.Textbox(label="")
-        with gr.Column():
-            gr.Markdown('## To: ')        
-            currency2=gr.Dropdown(choices=valid_currency, label="Currency")
-            box2=gr.Textbox(label="")
-    convert=gr.Button("Convert")
-    convert.click(fn=converter, inputs=[currency1,currency2,box1,box2], outputs=[box1,box2])
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Currency converter")
+        self.root.geometry('400x400')
 
-demo.launch(share=False)
+        self.
+
+
+
+
+
+
+
+
+
+if __name__=='__main__':
+
+    valid_currency, rates=get_data()
+    c_Rate=CurrencyRates()
+
+#     with gr.Blocks() as demo:
+#         gr.Markdown("# Currency converter")
+
+#         with gr.Row():
+#             with gr.Column():
+#                 gr.Markdown('## From: ')
+#                 currency1=gr.Dropdown(choices=valid_currency, label="Currency")
+#                 box1=gr.Textbox(label="")
+#             with gr.Column():
+#                 gr.Markdown('## To: ')        
+#                 currency2=gr.Dropdown(choices=valid_currency, label="Currency")
+#                 box2=gr.Textbox(label="")
+#         c=gr.Button("Convert")
+#         c.click(fn=converter, inputs=[currency1,currency2,box1,box2], outputs=[box1,box2])
+
+#     demo.launch(share=False)
