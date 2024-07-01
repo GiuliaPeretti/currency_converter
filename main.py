@@ -5,7 +5,6 @@ import tkinter as tk
 
 def get_data():
     api_key = open ('api_key.txt', 'r').read()
-    print(api_key)
 
     url = f'https://api.fastforex.io/fetch-all?api_key={api_key}'
     response = requests.get(url)
@@ -52,35 +51,47 @@ class CurrencyConverter:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Currency converter")
-        self.root.geometry('400x400')
+        self.root.geometry('400x200')
+        self.root.minsize(400,200)
+        self.col1 = tk.Frame(self.root)
+        self.col2 = tk.Frame(self.root)
+        self.col3 = tk.Frame(self.root)
+
+        element_width=10
 
         self.from_var=tk.StringVar(self.root)
         self.from_var.set('USD')
         self.from_menu = tk.OptionMenu(self.root, self.from_var, *valid_currency)
-        self.from_menu.grid(row=0,column=0)
+        self.from_menu.config(width=element_width)
+        self.from_menu.place(relx=0.1, rely=0.1)
+
+        self.amount_label=tk.Label(self.root, text='Amount: ')
+        self.amount_label.config(width=element_width)
+        self.amount_label.place(relx=0.1, rely=0.4)
+
+        self.amount_entry=tk.Entry(self.root, width=17)
+        self.amount_entry.place(relx=0.1, rely=0.7)
+
 
         self.to_var=tk.StringVar(self.root)
         self.to_var.set('EUR')
         self.to_menu = tk.OptionMenu(self.root, self.to_var, *valid_currency)
-        self.to_menu.grid(row=0,column=1)
+        self.to_menu.config(width=element_width)
+        self.to_menu.place(relx=0.65, rely=0.1)
 
-        self.amount_label=tk.Label(self.root, text='Amount: ')
-        self.amount_label.grid(row=1,column=0)
+        self.amount_label=tk.Label(self.root, text='Amount: ', width=element_width)
+        self.amount_label.place(relx=0.65, rely=0.4)
 
-        self.amount_entry=tk.Entry(self.root)
-        self.amount_entry.grid(row=2,column=0)
-
-        self.convert_button=tk.Button(self.root, text='Convert', command=self.convert_currency)
-        self.convert_button.grid(row=3)
-
-        self.amount_label=tk.Label(self.root, text='Amount: ')
-        self.amount_label.grid(row=1,column=1)
-
-        self.result_entry=tk.Entry(self.root, width=50)
-        self.result_entry.grid(row=2,column=1)
+        self.result_entry=tk.Entry(self.root, width=17)
+        self.result_entry.place(relx=0.65, rely=0.7)
 
         self.convert_button=tk.Button(self.root, text='Convert', command=self.convert_currency)
-        self.convert_button.grid(row=3)
+        self.convert_button.place(relx=0.42, rely=0.8)
+
+        self.convert_button=tk.Button(self.root, text='<->', command=self.switch_value)
+        self.convert_button.place(relx=0.45, rely=0.5)
+
+        
 
         self.root.mainloop()
 
@@ -90,7 +101,7 @@ class CurrencyConverter:
 
         if (self.amount_entry.get()==''):
             self.result_entry.delete(0)
-            self.result_entry.insert(0,'Insert an amount to convert')
+            self.result_entry.insert(0,'Insert amount')
 
         try:
             amount=float(self.amount_entry.get().replace(',','.'))
@@ -103,6 +114,8 @@ class CurrencyConverter:
         self.result_entry.delete(0)
         self.result_entry.insert(0,str(result))
 
+    def switch_value():
+        pass
 
 
 
@@ -118,7 +131,6 @@ if __name__=='__main__':
 
     valid_currency, rates=get_data()
     c_Rate=CurrencyRates()
-    print(valid_currency)
     CurrencyConverter()
 
 #     with gr.Blocks() as demo:
