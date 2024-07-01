@@ -54,7 +54,57 @@ class CurrencyConverter:
         self.root.title("Currency converter")
         self.root.geometry('400x400')
 
-        self.
+        self.from_var=tk.StringVar(self.root)
+        self.from_var.set('USD')
+        self.from_menu = tk.OptionMenu(self.root, self.from_var, *valid_currency)
+        self.from_menu.grid(row=0,column=0)
+
+        self.to_var=tk.StringVar(self.root)
+        self.to_var.set('EUR')
+        self.to_menu = tk.OptionMenu(self.root, self.to_var, *valid_currency)
+        self.to_menu.grid(row=0,column=1)
+
+        self.amount_label=tk.Label(self.root, text='Amount: ')
+        self.amount_label.grid(row=1,column=0)
+
+        self.amount_entry=tk.Entry(self.root)
+        self.amount_entry.grid(row=2,column=0)
+
+        self.convert_button=tk.Button(self.root, text='Convert', command=self.convert_currency)
+        self.convert_button.grid(row=3)
+
+        self.amount_label=tk.Label(self.root, text='Amount: ')
+        self.amount_label.grid(row=1,column=1)
+
+        self.result_entry=tk.Entry(self.root, width=50)
+        self.result_entry.grid(row=2,column=1)
+
+        self.convert_button=tk.Button(self.root, text='Convert', command=self.convert_currency)
+        self.convert_button.grid(row=3)
+
+        self.root.mainloop()
+
+    def convert_currency(self):
+        from_currency=self.from_var.get()
+        to_currency=self.to_var.get()
+
+        if (self.amount_entry.get()==''):
+            self.result_entry.delete(0)
+            self.result_entry.insert(0,'Insert an amount to convert')
+
+        try:
+            amount=float(self.amount_entry.get().replace(',','.'))
+        except:
+            self.result_entry.delete(0)
+            self.result_entry.insert(0,'Invalid input')
+            return
+
+        result=convert(from_currency, to_currency, amount)
+        self.result_entry.delete(0)
+        self.result_entry.insert(0,str(result))
+
+
+
 
 
 
@@ -68,6 +118,8 @@ if __name__=='__main__':
 
     valid_currency, rates=get_data()
     c_Rate=CurrencyRates()
+    print(valid_currency)
+    CurrencyConverter()
 
 #     with gr.Blocks() as demo:
 #         gr.Markdown("# Currency converter")
