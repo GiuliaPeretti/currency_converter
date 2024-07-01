@@ -3,10 +3,9 @@ from forex_python.converter import CurrencyRates
 import requests
 import tkinter as tk
 
-def get_data():
-    api_key = open ('api_key.txt', 'r').read()
 
-    url = f'https://api.fastforex.io/fetch-all?api_key={api_key}'
+def get_data():
+    url = f'https://api.fastforex.io/fetch-all?api_key={api_key}&api_key={api_key}'
     response = requests.get(url)
     data = response.json()
     rates=data['results']
@@ -39,12 +38,11 @@ def converter(currency1,currency2,box1,box2):
         return(result, box2)
 
 def convert(from_currency, to_currency, value):
-    if from_currency=='USD':
-        return round(value*rates[to_currency],2)
-    elif (to_currency=='USD'):
-        return round(value/rates[from_currency], 2)
-    else:
-        return round((value/rates['USD'])*rates[to_currency],2)
+    url = f'https://api.fastforex.io/convert?from={from_currency}&to={to_currency}&amount={value}&api_key={api_key}'
+    headers = {"accept": "application/json"}
+    response = requests.get(url, headers=headers)
+    result = response.json()['result'][to_currency]
+    return(response.status_code, result)
         
 class CurrencyConverter:
 
@@ -100,52 +98,33 @@ class CurrencyConverter:
         to_currency=self.to_var.get()
 
         if (self.amount_entry.get()==''):
-            self.result_entry.delete(0)
+            self.result_entry.delete(0, 'end')
             self.result_entry.insert(0,'Insert amount')
 
         try:
             amount=float(self.amount_entry.get().replace(',','.'))
         except:
-            self.result_entry.delete(0)
+            self.result_entry.delete(0, 'end')
             self.result_entry.insert(0,'Invalid input')
             return
 
-        result=convert(from_currency, to_currency, amount)
-        self.result_entry.delete(0)
+        status_code,result=convert(from_currency, to_currency, amount)
+        self.result_entry.delete(0, 'end')
         self.result_entry.insert(0,str(result))
 
-    def switch_value():
-        pass
+    def switch_value(self):
+        prev_from_var=self.from_var.get()
+        prev_to_var=self.to_var.get()
+        self.from_var.set(prev_to_var)
+        self.to_var.set(prev_from_var)
 
-
-
-
-
-
-
-
-
-
+        result=self.result_entry.get()
+        self.amount_entry.delete(0, 'end')
+        self.amount_entry.insert(0, result)
+        self.result_entry.delete(0, 'end')
 
 if __name__=='__main__':
-
+    api_key = open ('api_key.txt', 'r').read()
     valid_currency, rates=get_data()
     c_Rate=CurrencyRates()
     CurrencyConverter()
-
-#     with gr.Blocks() as demo:
-#         gr.Markdown("# Currency converter")
-
-#         with gr.Row():
-#             with gr.Column():
-#                 gr.Markdown('## From: ')
-#                 currency1=gr.Dropdown(choices=valid_currency, label="Currency")
-#                 box1=gr.Textbox(label="")
-#             with gr.Column():
-#                 gr.Markdown('## To: ')        
-#                 currency2=gr.Dropdown(choices=valid_currency, label="Currency")
-#                 box2=gr.Textbox(label="")
-#         c=gr.Button("Convert")
-#         c.click(fn=converter, inputs=[currency1,currency2,box1,box2], outputs=[box1,box2])
-
-#     demo.launch(share=False)
